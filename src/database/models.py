@@ -13,3 +13,5 @@ class CadUsuariosGEG(Base):
 
     def __repr__(self):
         return f"<CadUsuariosGEG(email={self.email_cad_usuarios_geg})>"
+
+# Este arquivo será movido para a camada de modelos.

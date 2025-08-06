@@ -1,8 +1,7 @@
 from automacao_geg import AutomacaoGEG, executar_automacao_geg
-from database.database import get_session_context
+from repositories.database import get_session_context
 from database.models import CadUsuariosGEG
 from pymnz.database import update_table_from_dataframe
-from database.database import get_session_context
 
 from services.data_service import DataService
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -63,8 +62,8 @@ if __name__ == "__main__":
     scheduler.add_job(
         executar_automacao,
         "cron",
-        hour=15,
-        minute=0,
+        hour=16,
+        minute=20,
         id="automacao_geg_diaria",
         replace_existing=True,
         misfire_grace_time=3600,  # Executa até 1h depois se perder o horário
@@ -72,8 +71,11 @@ if __name__ == "__main__":
     print(
         "⏰ Agendamento persistente configurado para rodar todos os dias às 15h. Se perder o horário, executa ao iniciar!"
     )
+
     try:
-        scheduler.start()
+        scheduler.start(True)
     except (KeyboardInterrupt, SystemExit):
-        print("Scheduler finalizado.")
+        print("🛑 Interrompendo o agendador...")
+        scheduler.shutdown()
+        print("✅ Agendador encerrado com sucesso.")    
         exit(0)
