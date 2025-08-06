@@ -63,8 +63,7 @@ def executar_automacao():
             print("Erro na automação")
 
 if __name__ == "__main__":
-    database_url = settings.database_url or "sqlite:///default.db"
-    jobstores = {"default": SQLAlchemyJobStore(url=database_url)}
+    jobstores = {"default": SQLAlchemyJobStore(url=settings.database_url)}
     scheduler = BlockingScheduler(jobstores=jobstores, daemon=True)
     scheduler.add_job(
         executar_automacao,
