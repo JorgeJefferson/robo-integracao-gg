@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environments
+env/
+venv/
+ENV/
+.venv/
+.env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and outputs
+*.log
+*.out
+*.bak
+
+# HTML responses
+resposta_login.html
+resposta_relatorio.html
+
+# Dependency files
+*.egg-info/
+dist/
+build/
+
+# Test and coverage
+.coverage
+htmlcov/
+.tox/
+.cache/
+
+# Misc
+*.tmp
+*.orig
