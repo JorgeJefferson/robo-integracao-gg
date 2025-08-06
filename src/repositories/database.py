@@ -6,11 +6,11 @@ from dotenv import load_dotenv
 import os
 
 
-load_dotenv(".env")
+load_dotenv()
 
 
 session_maker = sessionmaker(
-    bind=create_engine(os.getenv("DATABASE_URL", ""), echo=False),
+    bind=create_engine(os.getenv("ROBO_INTEGRACAO_GG_DATABASE_URL", ""), echo=False),
 )
 
 

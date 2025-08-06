@@ -12,7 +12,7 @@ from pymnz.database import update_table_from_dataframe
 from dotenv import load_dotenv
 import os
 
-load_dotenv(".env")
+load_dotenv()
 
 # Variável de controle para parar o agendador
 stop_scheduler = threading.Event()
@@ -67,7 +67,7 @@ def executar_automacao():
             print("Erro na automação")
 
 if __name__ == "__main__":
-    jobstores = {"default": SQLAlchemyJobStore(url=os.getenv("DATABASE_URL", ""))}
+    jobstores = {"default": SQLAlchemyJobStore(url=os.getenv("ROBO_INTEGRACAO_GG_DATABASE_URL", ""))}
     scheduler = BlockingScheduler(jobstores=jobstores, daemon=True)
     scheduler.add_job(
         executar_automacao,
