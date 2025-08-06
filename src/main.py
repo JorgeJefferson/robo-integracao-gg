@@ -9,7 +9,7 @@ import os
 stop_scheduler = threading.Event()
 
 def signal_handler(signum, frame):
-    print("🛑 Sinal de interrupção recebido. Encerrando o agendador...")
+    print("Sinal de interrupção recebido. Encerrando o agendador...")
     stop_scheduler.set()
 
 # Configura o manipulador de sinal para SIGINT (Ctrl+C)
@@ -37,7 +37,8 @@ if __name__ == "__main__":
         misfire_grace_time=3600,  # Executa até 1h depois se perder o horário
     )
     print(
-        "⏰ Agendamento persistente configurado para rodar todos os dias às 15h. Se perder o horário, executa ao iniciar!"
+        "Agendamento persistente configurado para rodar todos os dias às 15h.\n"
+        "Se perder o horário, executa ao iniciar!"
     )
 
     # Executa o agendador em um thread separado
@@ -51,7 +52,7 @@ if __name__ == "__main__":
     except (KeyboardInterrupt, SystemExit):
         pass
     finally:
-        print("🛑 Interrompendo o agendador...")
+        print("Interrompendo o agendador...")
         scheduler.shutdown()
         scheduler_thread.join()
-        print("✅ Agendador encerrado com sucesso.")
+        print("Agendador encerrado com sucesso.")
