@@ -2,8 +2,7 @@ import signal
 import threading
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-from dotenv import load_dotenv
-import os
+from config.settings import settings
 
 # Variável de controle para parar o agendador
 stop_scheduler = threading.Event()
@@ -20,12 +19,9 @@ def executar_automacao():
     print("🚀 Iniciando automação GEG...")
     # (O código da função `executar_automacao` permanece o mesmo)
 
-# Carrega variáveis do .env
-load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
-
 if __name__ == "__main__":
-    jobstores = {"default": SQLAlchemyJobStore(url=DATABASE_URL)}
+    database_url = settings.database_url or "sqlite:///default.db"
+    jobstores = {"default": SQLAlchemyJobStore(url=database_url)}
     scheduler = BlockingScheduler(jobstores=jobstores, daemon=True)
     scheduler.add_job(
         executar_automacao,

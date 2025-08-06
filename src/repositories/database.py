@@ -1,13 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
-from dotenv import load_dotenv
-import os
+from config.settings import settings
 
-load_dotenv()
 
 session_maker = sessionmaker(
-    bind=create_engine(os.getenv("DATABASE_URL", ""), echo=False),
+    bind=create_engine(settings.database_url, echo=False),
 )
 
 
