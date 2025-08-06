@@ -62,8 +62,8 @@ if __name__ == "__main__":
     scheduler.add_job(
         executar_automacao,
         "cron",
-        hour=16,
-        minute=20,
+        hour=15,
+        minute=0,
         id="automacao_geg_diaria",
         replace_existing=True,
         misfire_grace_time=3600,  # Executa até 1h depois se perder o horário
