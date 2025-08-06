@@ -1,3 +1,4 @@
+from json import load
 import signal
 import threading
 from automacao_geg import AutomacaoGEG, executar_automacao_geg
@@ -7,8 +8,11 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from repositories.database import get_session_context
 from automacao_geg import executar_automacao_geg  # Importa a função de automação
-from config.settings import settings
 from pymnz.database import update_table_from_dataframe
+from dotenv import load_dotenv
+import os
+
+load_dotenv(".env")
 
 # Variável de controle para parar o agendador
 stop_scheduler = threading.Event()
@@ -63,7 +67,7 @@ def executar_automacao():
             print("Erro na automação")
 
 if __name__ == "__main__":
-    jobstores = {"default": SQLAlchemyJobStore(url=settings.database_url)}
+    jobstores = {"default": SQLAlchemyJobStore(url=os.getenv("DATABASE_URL", ""))}
     scheduler = BlockingScheduler(jobstores=jobstores, daemon=True)
     scheduler.add_job(
         executar_automacao,
