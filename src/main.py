@@ -1,5 +1,6 @@
 import signal
 import threading
+from typing import List
 from automacao_geg import AutomacaoGEG, executar_automacao_geg
 from database.models import CadUsuariosGEG
 from services.data_service import DataService
@@ -10,6 +11,7 @@ from automacao_geg import executar_automacao_geg  # Importa a função de automa
 from pymnz.database import update_table_from_dataframe
 from dotenv import load_dotenv
 from pymnz.utils import retry_on_failure
+import pandas as pd
 import os
 
 load_dotenv()
@@ -28,11 +30,30 @@ signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
 
+@retry_on_failure(5, retry_interval=10)
+def buscar_usuarios_geg():
+    with get_session_context() as session:
+        return session.query(CadUsuariosGEG)
+
+
+@retry_on_failure(5, retry_interval=10)
+def salvar_prontuarios_geg(df: pd.DataFrame) -> None:
+    with get_session_context() as session:
+        try:
+            update_table_from_dataframe(
+                df=df,
+                table_name="log_prontuarios_gente_gestao",
+                primary_keys=["cpf_log_prontuarios_gente_gestao"],
+                conn=session,
+            )
+        except Exception as e:
+            print(f"Erro ao atualizar tabela log_prontuarios_gente_gestao: {str(e)}")
+
+
 @retry_on_failure(max_retries=5, retry_interval=10)
 def executar_automacao():
     print("Iniciando automação GEG...")
-    with get_session_context() as session:
-        cad_usuarios_geg = session.query(CadUsuariosGEG)
+    cad_usuarios_geg: List[CadUsuariosGEG] = buscar_usuarios_geg()  # type: ignore
     if not cad_usuarios_geg:
         print("Nenhuma credencial encontrada no banco de dados.")
         return
@@ -42,21 +63,8 @@ def executar_automacao():
         senha = str(cred.senha_cad_usuarios_geg)
         sucesso, arquivo_csv, colaboradores = executar_automacao_geg(email, senha)
         df = DataService.converter_dados_para_df(colaboradores)
-        with get_session_context() as session:
-            try:
-                update_table_from_dataframe(
-                    df=df,
-                    table_name="log_prontuarios_gente_gestao",
-                    primary_keys=["cpf_log_prontuarios_gente_gestao"],
-                    conn=session,
-                )
-                session.commit()
-            except Exception as e:
-                print(
-                    f"Erro ao atualizar tabela log_prontuarios_gente_gestao: {str(e)}"
-                )
-            finally:
-                session.close()
+        salvar_prontuarios_geg(df)
+
         if sucesso:
             print(f"Automação concluída com sucesso!")
             print(f"Arquivo CSV: {arquivo_csv}")
