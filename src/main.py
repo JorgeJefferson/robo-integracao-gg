@@ -1,4 +1,3 @@
-from json import load
 import signal
 import threading
 from automacao_geg import AutomacaoGEG, executar_automacao_geg
@@ -10,6 +9,7 @@ from repositories.database import get_session_context
 from automacao_geg import executar_automacao_geg  # Importa a função de automação
 from pymnz.database import update_table_from_dataframe
 from dotenv import load_dotenv
+from pymnz.utils import retry_on_failure
 import os
 
 load_dotenv()
@@ -17,14 +17,18 @@ load_dotenv()
 # Variável de controle para parar o agendador
 stop_scheduler = threading.Event()
 
+
 def signal_handler(signum, frame):
     print("Sinal de interrupção recebido. Encerrando o agendador...")
     stop_scheduler.set()
+
 
 # Configura o manipulador de sinal para SIGINT (Ctrl+C)
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
+
+@retry_on_failure(max_retries=5, retry_interval=10)
 def executar_automacao():
     print("Iniciando automação GEG...")
     with get_session_context() as session:
@@ -57,17 +61,31 @@ def executar_automacao():
             print(f"Automação concluída com sucesso!")
             print(f"Arquivo CSV: {arquivo_csv}")
             if colaboradores:
+                from pprint import pprint
+
                 print(f"Colaboradores extraídos: {len(colaboradores)}")
                 automacao = AutomacaoGEG()
                 stats = automacao.obter_estatisticas(colaboradores)
-                print(f"Estatísticas: {stats}")
+                print("Estatísticas:")
+                pprint(stats)
+
             else:
                 print("Nenhum colaborador foi extraído")
         else:
             print("Erro na automação")
 
+
 if __name__ == "__main__":
-    jobstores = {"default": SQLAlchemyJobStore(url=os.getenv("ROBO_INTEGRACAO_GG_DATABASE_URL", ""))}
+
+    executar_automacao()
+
+    exit(0)
+
+    jobstores = {
+        "default": SQLAlchemyJobStore(
+            url=os.getenv("ROBO_INTEGRACAO_GG_DATABASE_URL", "")
+        )
+    }
     scheduler = BlockingScheduler(jobstores=jobstores, daemon=True)
     scheduler.add_job(
         executar_automacao,
