@@ -77,9 +77,8 @@ def executar_automacao():
 
 if __name__ == "__main__":
 
+    # Executa a automação imediatamente
     executar_automacao()
-
-    exit(0)
 
     jobstores = {
         "default": SQLAlchemyJobStore(
